@@ -1,0 +1,31 @@
+Source: python-dogpile.cache
+Section: python
+Priority: optional
+Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
+Uploaders: Julien Danjou <acid@debian.org>,
+           Thomas Goirand <zigo@debian.org>,
+           Mehdi Abaakouk <sileht@sileht.net>
+Build-Depends: debhelper (>= 9), python-setuptools, python-all (>= 2.6.6-3~), openstack-pkg-tools
+Standards-Version: 3.9.4
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-dogpile.cache.git
+Vcs-Git: git://anonscm.debian.org/openstack/python-dogpile.cache.git
+Homepage: http://bitbucket.org/zzzeek/dogpile.cache
+
+Package: python-dogpile.cache
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${python:Depends}, ${misc:Depends}
+Recommends: ${python:Recommends}
+Description: caching front-end based on the Dogpile lock
+ A caching API built around the concept of a "dogpile lock", which allows
+ continued access to an expiring data value while a single thread generates a
+ new value.
+ .
+ dogpile.cache builds on the dogpile.core locking system
+ (see http://pypi.python.org/pypi/dogpile.core), which implements the idea of
+ "allow one creator to write while others read" in the abstract. Overall,
+ dogpile.cache is intended as a replacement to the Beaker (see
+ http://beaker.groovie.org) caching system, the internals of which are written
+ by the same author. All the ideas of Beaker which "work" are re-implemented in
+ dogpile.cache in a more efficient and succinct manner, and all the cruft
+ (Beaker's internals were first written in 2005) relegated to the trash heap.

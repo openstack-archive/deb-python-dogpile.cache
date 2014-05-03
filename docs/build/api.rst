@@ -14,12 +14,12 @@ Backend API
 =============
 
 See the section :ref:`creating_backends` for details on how to
-register new backends or :ref:`changing_backend_behavior` for details on 
-how to alter the behavior of existing backends.  
+register new backends or :ref:`changing_backend_behavior` for details on
+how to alter the behavior of existing backends.
 
 .. automodule:: dogpile.cache.api
     :members:
-    
+
 
 Backends
 ==========
@@ -35,11 +35,11 @@ Backends
 
 .. automodule:: dogpile.cache.backends.file
     :members:
-    
+
 .. automodule:: dogpile.cache.proxy
     :members:
-    
- 
+
+
 Plugins
 ========
 

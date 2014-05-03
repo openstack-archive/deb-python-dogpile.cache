@@ -1,6 +1,5 @@
 from hashlib import sha1
 import inspect
-import sys
 import re
 import collections
 from . import compat
@@ -14,7 +13,7 @@ def coerce_string_conf(d):
             continue
 
         v = v.strip()
-        if re.match(r'^\d+$', v):
+        if re.match(r'^[-+]?\d+$', v):
             result[k] = int(v)
         elif v.lower() in ('false', 'true'):
             result[k] = v.lower() == 'true'
@@ -31,10 +30,8 @@ class PluginLoader(object):
 
     def load(self, name):
         if name in self.impls:
-             return self.impls[name]()
-        else: #pragma NO COVERAGE
-            # TODO: if someone has ideas on how to
-            # unit test entrypoint stuff, let me know.
+            return self.impls[name]()
+        else:  # pragma NO COVERAGE
             import pkg_resources
             for impl in pkg_resources.iter_entry_points(
                                 self.group,

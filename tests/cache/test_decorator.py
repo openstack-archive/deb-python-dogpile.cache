@@ -1,7 +1,7 @@
 #! coding: utf-8
 
 from ._fixtures import _GenericBackendFixture
-from . import eq_, requires_py3k
+from . import eq_, requires_py3k, winsleep
 from unittest import TestCase
 import time
 from dogpile.cache import util, compat
@@ -75,7 +75,9 @@ class DecoratorTest(_GenericBackendFixture, TestCase):
     def test_decorator_expire_callable_zero(self):
         go = self._fixture(expiration_time=lambda: 0)
         eq_(go(1, 2), (1, 1, 2))
+        winsleep()
         eq_(go(1, 2), (2, 1, 2))
+        winsleep()
         eq_(go(1, 2), (3, 1, 2))
 
     def test_explicit_expire(self):
@@ -96,6 +98,22 @@ class DecoratorTest(_GenericBackendFixture, TestCase):
         eq_(go(1, 2), (3, 1, 2))
         go.set(0, 1, 3)
         eq_(go(1, 3), 0)
+
+    def test_explicit_get(self):
+        go = self._fixture(expiration_time=1)
+        eq_(go(1, 2), (1, 1, 2))
+        eq_(go.get(1, 2), (1, 1, 2))
+        eq_(go.get(2, 1), NO_VALUE)
+        eq_(go(2, 1), (2, 2, 1))
+        eq_(go.get(2, 1), (2, 2, 1))
+
+    def test_explicit_get_multi(self):
+        go = self._multi_fixture(expiration_time=1)
+        eq_(go(1, 2), ['1 1', '1 2'])
+        eq_(go.get(1, 2), ['1 1', '1 2'])
+        eq_(go.get(3, 1), [NO_VALUE, '1 1'])
+        eq_(go(3, 1), ['2 3', '1 1'])
+        eq_(go.get(3, 1), ['2 3', '1 1'])
 
     def test_explicit_set_multi(self):
         go = self._multi_fixture(expiration_time=1)
@@ -302,6 +320,13 @@ class CacheDecoratorTest(_GenericBackendFixture, TestCase):
         generate.set({7: 18, 10: 15})
         eq_(generate(2, 7, 10), {2: '2 5', 7: 18, 10: 15})
 
+        eq_(
+            generate.refresh(2, 7),
+            {2: '2 7', 7: '7 8'}
+        )
+        eq_(generate(2, 7, 10), {2: '2 7', 10: 15, 7: '7 8'})
+
+
     def test_multi_asdict_keys_missing(self):
         reg = self._region()
 
@@ -376,5 +401,3 @@ class CacheDecoratorTest(_GenericBackendFixture, TestCase):
 
         generate.set({7: 18, 10: 15})
         eq_(generate(2, 7, 10), ['2 5', 18, 15])
-
-

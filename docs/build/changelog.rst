@@ -2,6 +2,140 @@
 Changelog
 ==============
 .. changelog::
+    :version: 0.5.3
+    :released: Wed Jan 8 2014
+
+    .. change::
+        :tags: bug
+        :pullreq: 10
+
+      Fixed bug where the key_mangler would get in the way of usage of the
+      async_creation_runner feature within the :meth:`.Region.get_or_create`
+      method, by sending in the mangled key instead of the original key.  The
+      "mangled" key is only supposed to be exposed within the backend storage,
+      not the creation function which sends the key back into the :meth:`.Region.set`,
+      which does the mangling itself.  Pull request courtesy Ryan Kolak.
+
+    .. change::
+        :tags: bug, py3k
+
+      Fixed bug where the :meth:`.Region.get_multi` method wasn't calling
+      the backend correctly in Py3K (e.g. was passing a destructive ``map()``
+      object) which would cause this method to fail on the memcached backend.
+
+    .. change::
+        :tags: feature
+        :tickets: 55
+
+      Added a ``get()`` method to complement the ``set()``, ``invalidate()``
+      and ``refresh()`` methods established on functions decorated by
+      :meth:`.CacheRegion.cache_on_arguments` and
+      :meth:`.CacheRegion.cache_multi_on_arguments`.  Pullreq courtesy
+      Eric Hanchrow.
+
+    .. change::
+        :tags: feature
+        :tickets: 51
+        :pullreq: 11
+
+      Added a new variant on :class:`.MemoryBackend`, :class:`.MemoryPickleBackend`.
+      This backend applies ``pickle.dumps()`` and ``pickle.loads()`` to cached
+      values upon set and get, so that similar copy-on-cache behavior as that
+      of other backends is employed, guarding cached values against subsequent
+      in-memory state changes.  Pullreq courtesy Jonathan Vanasco.
+
+    .. change::
+        :tags: bug
+        :pullreq: 9
+
+      Fixed a format call in the redis backend which would otherwise fail
+      on Python 2.6; courtesy Jeff Dairiki.
+
+.. changelog::
+    :version: 0.5.2
+    :released: Fri Nov 15 2013
+
+    .. change::
+        :tags: bug
+
+      Fixes to routines on Windows, including that default unit tests pass,
+      and an adjustment to the "soft expiration" feature to ensure the
+      expiration works given windows time.time() behavior.
+
+    .. change::
+        :tags: bug
+
+      Added py2.6 compatibility for unsupported ``total_seconds()`` call
+      in region.py
+
+    .. change::
+        :tags: feature
+        :tickets: 44
+
+      Added a new argument ``lock_factory`` to the :class:`.DBMBackend`
+      implementation.  This allows for drop-in replacement of the default
+      :class:`.FileLock` backend, which builds on ``os.flock()`` and only
+      supports Unix platforms.  A new abstract base :class:`.AbstractFileLock`
+      has been added to provide a common base for custom lock implementations.
+      The documentation points to an example thread-based rw lock which is
+      now tested on Windows.
+
+.. changelog::
+    :version: 0.5.1
+    :released: Thu Oct 10 2013
+
+    .. change::
+        :tags: feature
+        :tickets: 38
+
+      The :meth:`.CacheRegion.invalidate` method now supports an option
+      ``hard=True|False``.  A "hard" invalidation, equivalent to the
+      existing functionality of :meth:`.CacheRegion.invalidate`, means
+      :meth:`.CacheRegion.get_or_create` will not return the "old" value at
+      all, forcing all getters to regenerate or wait for a regeneration.
+      "soft" invalidation means that getters can continue to return the
+      old value until a new one is generated.
+
+    .. change::
+        :tags: feature
+        :tickets: 40
+
+      New dogpile-specific exception classes have been added, so that
+      issues like "region already configured", "region unconfigured",
+      raise dogpile-specific exceptions.  Other exception classes have
+      been made more specific.  Also added new accessor
+      :attr:`.CacheRegion.is_configured`. Pullreq courtesy Morgan Fainberg.
+
+    .. change::
+        :tags: bug
+
+      Erroneously missed when the same change was made for ``set()``
+      in 0.5.0, the Redis backend now uses ``pickle.HIGHEST_PROTOCOL``
+      for the ``set_multi()`` method as well when producing pickles.
+      Courtesy Łukasz Fidosz.
+
+    .. change::
+        :tags: bug, redis, py3k
+        :tickets: 39
+
+      Fixed an errant ``u''`` causing incompatibility in Python3.2
+      in the Redis backend, courtesy Jimmey Mabey.
+
+    .. change::
+        :tags: bug
+
+      The :func:`.util.coerce_string_conf` method now correctly coerces
+      negative integers and those with a leading + sign. This previously
+      prevented configuring a :class:`.CacheRegion` with an ``expiration_time``
+      of ``'-1'``. Courtesy David Beitey.
+
+    .. change::
+        :tags: bug
+
+      The ``refresh()`` method on :meth:`.CacheRegion.cache_multi_on_arguments`
+      now supports the ``asdict`` flag.
+
+.. changelog::
     :version: 0.5.0
     :released: Fri Jun 21 2013
 

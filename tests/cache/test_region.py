@@ -1,9 +1,10 @@
 import pprint
 from unittest import TestCase
 from dogpile.cache.api import CacheBackend, CachedValue, NO_VALUE
+from dogpile.cache import exception
 from dogpile.cache import make_region, register_backend, CacheRegion, util
 from dogpile.cache.proxy import ProxyBackend
-from . import eq_, is_, assert_raises_message, io, configparser
+from . import eq_, is_, assert_raises_message, io, configparser, winsleep
 import time, datetime
 import itertools
 from collections import defaultdict
@@ -68,7 +69,7 @@ class RegionTest(TestCase):
         my_region = make_region()
 
         assert_raises_message(
-            Exception,
+            exception.ValidationError,
             "expiration_time is not a number or timedelta.",
             my_region.configure, 'mock', 'one hour'
         )
@@ -99,18 +100,20 @@ class RegionTest(TestCase):
         reg = CacheRegion()
         reg.configure("mock")
         assert_raises_message(
-            Exception,
+            exception.RegionAlreadyConfigured,
             "This region is already configured",
             reg.configure, "mock"
         )
+        eq_(reg.is_configured, True)
 
     def test_no_config(self):
         reg = CacheRegion()
         assert_raises_message(
-            Exception,
+            exception.RegionNotConfigured,
             "No backend is configured on this region.",
             getattr, reg, "backend"
         )
+        eq_(reg.is_configured, False)
 
     def test_set_get_value(self):
         reg = self._region()
@@ -206,13 +209,14 @@ class RegionTest(TestCase):
         eq_(reg.get("some key"), "some value 2")
 
 
-    def test_invalidate_get(self):
+    def test_hard_invalidate_get(self):
         reg = self._region()
         reg.set("some key", "some value")
+        time.sleep(.1)
         reg.invalidate()
         is_(reg.get("some key"), NO_VALUE)
 
-    def test_invalidate_get_or_create(self):
+    def test_hard_invalidate_get_or_create(self):
         reg = self._region()
         counter = itertools.count(1)
         def creator():
@@ -220,9 +224,63 @@ class RegionTest(TestCase):
         eq_(reg.get_or_create("some key", creator),
                     "some value 1")
 
+        time.sleep(.1)
         reg.invalidate()
         eq_(reg.get_or_create("some key", creator),
                     "some value 2")
+
+    def test_soft_invalidate_get(self):
+        reg = self._region(config_args={"expiration_time": 1})
+        reg.set("some key", "some value")
+        time.sleep(.1)
+        reg.invalidate(hard=False)
+        is_(reg.get("some key"), NO_VALUE)
+
+    def test_soft_invalidate_get_or_create(self):
+        reg = self._region(config_args={"expiration_time": 1})
+        counter = itertools.count(1)
+        def creator():
+            return "some value %d" % next(counter)
+        eq_(reg.get_or_create("some key", creator),
+                    "some value 1")
+
+        time.sleep(.1)
+        reg.invalidate(hard=False)
+        eq_(reg.get_or_create("some key", creator),
+                    "some value 2")
+
+    def test_soft_invalidate_get_or_create_multi(self):
+        reg = self._region(config_args={"expiration_time": 5})
+        values = [1, 2, 3]
+        def creator(*keys):
+            v = values.pop(0)
+            return [v for k in keys]
+        ret = reg.get_or_create_multi(
+                    [1, 2], creator)
+        eq_(ret, [1, 1])
+        time.sleep(.1)
+        reg.invalidate(hard=False)
+        ret = reg.get_or_create_multi(
+                    [1, 2], creator)
+        eq_(ret, [2, 2])
+
+    def test_soft_invalidate_requires_expire_time_get(self):
+        reg = self._region()
+        reg.invalidate(hard=False)
+        assert_raises_message(
+            exception.DogpileCacheException,
+            "Non-None expiration time required for soft invalidation",
+            reg.get_or_create, "some key", lambda: "x"
+        )
+
+    def test_soft_invalidate_requires_expire_time_get_multi(self):
+        reg = self._region()
+        reg.invalidate(hard=False)
+        assert_raises_message(
+            exception.DogpileCacheException,
+            "Non-None expiration time required for soft invalidation",
+            reg.get_or_create_multi, ["k1", "k2"], lambda k: "x"
+        )
 
     def test_should_cache_fn(self):
         reg = self._region()
@@ -235,6 +293,7 @@ class RegionTest(TestCase):
                     should_cache_fn=should_cache_fn)
         eq_(ret, 1)
         eq_(reg.backend._cache['some key'][0], 1)
+        time.sleep(.1)
         reg.invalidate()
         ret = reg.get_or_create(
                     "some key", creator,
@@ -248,6 +307,7 @@ class RegionTest(TestCase):
         eq_(ret, 3)
         eq_(reg.backend._cache['some key'][0], 3)
 
+
     def test_should_cache_fn_multi(self):
         reg = self._region()
         values = [1, 2, 3]
@@ -260,12 +320,14 @@ class RegionTest(TestCase):
                     should_cache_fn=should_cache_fn)
         eq_(ret, [1, 1])
         eq_(reg.backend._cache[1][0], 1)
+        time.sleep(.1)
         reg.invalidate()
         ret = reg.get_or_create_multi(
                     [1, 2], creator,
                     should_cache_fn=should_cache_fn)
         eq_(ret, [2, 2])
         eq_(reg.backend._cache[1][0], 1)
+        time.sleep(.1)
         reg.invalidate()
         ret = reg.get_or_create_multi(
                     [1, 2], creator,

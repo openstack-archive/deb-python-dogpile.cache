@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from dogpile.core import Lock, NeedRegenerationException
 from dogpile.core.nameregistry import NameRegistry
+from . import exception
 from .util import function_key_generator, PluginLoader, \
     memoized_property, coerce_string_conf, function_multi_key_generator
 from .api import NO_VALUE, CachedValue
@@ -170,7 +171,8 @@ class CacheRegion(object):
             self.key_mangler = key_mangler
         else:
             self.key_mangler = None
-        self._invalidated = None
+        self._hard_invalidated = None
+        self._soft_invalidated = None
         self.async_creation_runner = async_creation_runner
 
     def configure(self, backend,
@@ -221,7 +223,7 @@ class CacheRegion(object):
          """
 
         if "backend" in self.__dict__:
-            raise Exception(
+            raise exception.RegionAlreadyConfigured(
                     "This region is already "
                     "configured with backend: %s"
                     % self.backend)
@@ -237,9 +239,10 @@ class CacheRegion(object):
         if not expiration_time or isinstance(expiration_time, Number):
             self.expiration_time = expiration_time
         elif isinstance(expiration_time, datetime.timedelta):
-            self.expiration_time = int(expiration_time.total_seconds())
+            self.expiration_time = int(compat.timedelta_total_seconds(expiration_time))
         else:
-            raise Exception('expiration_time is not a number or timedelta.')
+            raise exception.ValidationError(
+                'expiration_time is not a number or timedelta.')
 
         if self.key_mangler is None:
             self.key_mangler = self.backend.key_mangler
@@ -262,8 +265,8 @@ class CacheRegion(object):
             proxy = proxy()
 
         if not issubclass(type(proxy), ProxyBackend):
-            raise Exception("Type %s is not a valid ProxyBackend"
-                    % type(proxy))
+            raise TypeError("Type %s is not a valid ProxyBackend"
+                            % type(proxy))
 
         self.backend = proxy.wrap(self.backend)
 
@@ -289,7 +292,7 @@ class CacheRegion(object):
         else:
             return self._LockWrapper()
 
-    def invalidate(self):
+    def invalidate(self, hard=True):
         """Invalidate this :class:`.CacheRegion`.
 
         Invalidation works by setting a current timestamp
@@ -302,13 +305,36 @@ class CacheRegion(object):
         local to this instance of :class:`.CacheRegion`.
 
         Once set, the invalidation time is honored by
-        the :meth:`.CacheRegion.get_or_create` and
+        the :meth:`.CacheRegion.get_or_create`,
+        :meth:`.CacheRegion.get_or_create_multi` and
         :meth:`.CacheRegion.get` methods.
+
+        The method
+        supports both "hard" and "soft" invalidation options.  With "hard"
+        invalidation, :meth:`.CacheRegion.get_or_create` will force an immediate
+        regeneration of the value which all getters will wait for.  With
+        "soft" invalidation, subsequent getters will return the "old" value until
+        the new one is available.
+
+        Usage of "soft" invalidation requires that the region or the method
+        is given a non-None expiration time.
 
         .. versionadded:: 0.3.0
 
+        :param hard: if True, cache values will all require immediate
+         regeneration; dogpile logic won't be used.  If False, the
+         creation time of existing values will be pushed back before
+         the expiration time so that a return+regen will be invoked.
+
+         .. versionadded:: 0.5.1
+
         """
-        self._invalidated = time.time()
+        if hard:
+            self._hard_invalidated = time.time()
+            self._soft_invalidated = None
+        else:
+            self._hard_invalidated = None
+            self._soft_invalidated = time.time()
 
     def configure_from_config(self, config_dict, prefix):
         """Configure from a configuration dictionary
@@ -346,7 +372,18 @@ class CacheRegion(object):
 
     @memoized_property
     def backend(self):
-        raise Exception("No backend is configured on this region.")
+        raise exception.RegionNotConfigured(
+            "No backend is configured on this region.")
+
+    @property
+    def is_configured(self):
+        """Return True if the backend has been configured via the
+        :meth:`.CacheRegion.configure` method already.
+
+        .. versionadded:: 0.5.1
+
+        """
+        return 'backend' in self.__dict__
 
     def get(self, key, expiration_time=None, ignore_expiration=False):
         """Return a value from the cache, based on the given key.
@@ -419,14 +456,15 @@ class CacheRegion(object):
 
             current_time = time.time()
 
+            invalidated = self._hard_invalidated or self._soft_invalidated
             def value_fn(value):
                 if value is NO_VALUE:
                     return value
                 elif expiration_time is not None and \
                       current_time - value.metadata["ct"] > expiration_time:
                     return NO_VALUE
-                elif self._invalidated and \
-                        value.metadata["ct"] < self._invalidated:
+                elif invalidated and \
+                        value.metadata["ct"] < invalidated:
                     return NO_VALUE
                 else:
                     return value
@@ -466,7 +504,7 @@ class CacheRegion(object):
 
         """
         if self.key_mangler:
-            keys = map(lambda key: self.key_mangler(key), keys)
+            keys = list(map(lambda key: self.key_mangler(key), keys))
 
         backend_values = self.backend.get_multi(keys)
 
@@ -549,6 +587,7 @@ class CacheRegion(object):
             :meth:`.CacheRegion.get_or_create_multi` - multiple key/value version
 
         """
+        orig_key = key
         if self.key_mangler:
             key = self.key_mangler(key)
 
@@ -556,10 +595,15 @@ class CacheRegion(object):
             value = self.backend.get(key)
             if value is NO_VALUE or \
                 value.metadata['v'] != value_version or \
-                    (self._invalidated and
-                    value.metadata["ct"] < self._invalidated):
+                    (self._hard_invalidated and
+                    value.metadata["ct"] < self._hard_invalidated):
                 raise NeedRegenerationException()
-            return value.payload, value.metadata["ct"]
+            ct = value.metadata["ct"]
+            if self._soft_invalidated:
+                if ct < self._soft_invalidated:
+                    ct = time.time() - expiration_time - .0001
+
+            return value.payload, ct
 
         def gen_value():
             created_value = creator()
@@ -574,9 +618,14 @@ class CacheRegion(object):
         if expiration_time is None:
             expiration_time = self.expiration_time
 
+        if expiration_time is None and self._soft_invalidated:
+            raise exception.DogpileCacheException(
+                    "Non-None expiration time required "
+                    "for soft invalidation")
+
         if self.async_creation_runner:
             def async_creator(mutex):
-                return self.async_creation_runner(self, key, creator, mutex)
+                return self.async_creation_runner(self, orig_key, creator, mutex)
         else:
             async_creator = None
 
@@ -630,13 +679,22 @@ class CacheRegion(object):
 
         def get_value(key):
             value = values.get(key, NO_VALUE)
+
             if value is NO_VALUE or \
                 value.metadata['v'] != value_version or \
-                    (self._invalidated and
-                    value.metadata["ct"] < self._invalidated):
+                    (self._hard_invalidated and
+                    value.metadata["ct"] < self._hard_invalidated):
+                # dogpile.core understands a 0 here as
+                # "the value is not available", e.g.
+                # _has_value() will return False.
                 return value.payload, 0
             else:
-                return value.payload, value.metadata["ct"]
+                ct = value.metadata["ct"]
+                if self._soft_invalidated:
+                    if ct < self._soft_invalidated:
+                        ct = time.time() - expiration_time - .0001
+
+                return value.payload, ct
 
         def gen_value():
             raise NotImplementedError()
@@ -646,6 +704,11 @@ class CacheRegion(object):
 
         if expiration_time is None:
             expiration_time = self.expiration_time
+
+        if expiration_time is None and self._soft_invalidated:
+            raise exception.DogpileCacheException(
+                    "Non-None expiration time required "
+                    "for soft invalidation")
 
         mutexes = {}
 
@@ -751,7 +814,7 @@ class CacheRegion(object):
         """
 
         if self.key_mangler:
-            keys = map(lambda key: self.key_mangler(key), keys)
+            keys = list(map(lambda key: self.key_mangler(key), keys))
 
         self.backend.delete_multi(keys)
 
@@ -811,6 +874,15 @@ class CacheRegion(object):
             newvalue = generate_something.refresh(5, 6)
 
         .. versionadded:: 0.5.0 Added ``refresh()`` method to decorated
+           function.
+
+        Lastly, the ``get()`` method returns either the value cached
+        for the given key, or the token ``NO_VALUE`` if no such key
+        exists::
+
+            value = generate_something.get(5, 6)
+
+        .. versionadded:: 0.5.3 Added ``get()`` method to decorated
            function.
 
         The default key generation will use the name
@@ -943,6 +1015,10 @@ class CacheRegion(object):
                 key = key_generator(*arg, **kw)
                 self.set(key, value)
 
+            def get(*arg, **kw):
+                key = key_generator(*arg, **kw)
+                return self.get(key)
+
             def refresh(*arg, **kw):
                 key = key_generator(*arg, **kw)
                 value = fn(*arg, **kw)
@@ -952,6 +1028,7 @@ class CacheRegion(object):
             decorate.set = set_
             decorate.invalidate = invalidate
             decorate.refresh = refresh
+            decorate.get = get
 
             return decorate
         return decorator
@@ -1007,16 +1084,24 @@ class CacheRegion(object):
             generate_something.set({"k1": "value1",
                                     "k2": "value2", "k3": "value3"})
 
-        an ``invalidate()`` method, which has the effect of deleting
+        ...an ``invalidate()`` method, which has the effect of deleting
         the given sequence of keys using the same mechanism as that of
         :meth:`.CacheRegion.delete_multi`::
 
             generate_something.invalidate("k1", "k2", "k3")
 
-        and finally a ``refresh()`` method, which will call the creation
+        ...a ``refresh()`` method, which will call the creation
         function, cache the new values, and return them::
 
             values = generate_something.refresh("k1", "k2", "k3")
+
+        ...and a ``get()`` method, which will return values
+        based on the given arguments::
+
+            values = generate_something.get("k1", "k2", "k3")
+
+        .. versionadded:: 0.5.3 Added ``get()`` method to decorated
+           function.
 
         Parameters passed to :meth:`.CacheRegion.cache_multi_on_arguments`
         have the same meaning as those passed to
@@ -1111,17 +1196,28 @@ class CacheRegion(object):
                         in zip(gen_keys, keys))
                     )
 
+            def get(*arg):
+                keys = key_generator(*arg)
+                return self.get_multi(keys)
+
             def refresh(*arg):
                 keys = key_generator(*arg)
                 values = fn(*arg)
-                self.set_multi(
-                            dict(zip(keys, values))
-                        )
-                return values
+                if asdict:
+                    self.set_multi(
+                                dict(zip(keys, [values[a] for a in arg]))
+                            )
+                    return values
+                else:
+                    self.set_multi(
+                                dict(zip(keys, values))
+                            )
+                    return values
 
             decorate.set = set_
             decorate.invalidate = invalidate
             decorate.refresh = refresh
+            decorate.get = get
 
             return decorate
         return decorator
@@ -1137,4 +1233,3 @@ def make_region(*arg, **kw):
 
     """
     return CacheRegion(*arg, **kw)
-

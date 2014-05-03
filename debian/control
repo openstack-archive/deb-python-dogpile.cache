@@ -5,7 +5,11 @@ Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
 Uploaders: Julien Danjou <acid@debian.org>,
            Thomas Goirand <zigo@debian.org>,
            Mehdi Abaakouk <sileht@sileht.net>
-Build-Depends: debhelper (>= 9), python-setuptools, python-all (>= 2.6.6-3~), openstack-pkg-tools
+Build-Depends: debhelper (>= 9),
+               openstack-pkg-tools,
+               python-all (>= 2.6.6-3~),
+               python-setuptools
+Build-Depends-Indep: python-dogpile.core, python-nose
 Standards-Version: 3.9.5
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-dogpile.cache.git
 Vcs-Git: git://anonscm.debian.org/openstack/python-dogpile.cache.git
@@ -14,7 +18,7 @@ Homepage: http://bitbucket.org/zzzeek/dogpile.cache
 Package: python-dogpile.cache
 Architecture: all
 Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${python:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${python:Depends}
 Recommends: ${python:Recommends}
 Description: caching front-end based on the Dogpile lock
  A caching API built around the concept of a "dogpile lock", which allows

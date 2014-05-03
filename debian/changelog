@@ -3,6 +3,7 @@ python-dogpile.cache (0.5.3-1) unstable; urgency=medium
   * New upstream release (Closes: #745488).
   * Fixed upstream VCS URLs.
   * Standards-Version: is now 3.9.5.
+  * Now running unit tests at build time.
 
  -- Thomas Goirand <zigo@debian.org>  Sat, 03 May 2014 21:04:30 +0800
 

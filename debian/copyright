@@ -1,6 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: dogpile.cache
-Source: git://github.com/dprince/dogpile.cache.git
+Upstream-Contact: Mike Bayer <mike_mp@zzzcomputing.com>
+Source: https://bitbucket.org/zzzeek/dogpile.cache.git
 
 Files: debian/*
 Copyright: (c) 2013, Thomas Goirand <zigo@debian.org>

@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-UPSTREAM_GIT = git://github.com/dprince/dogpile.cache.git
+UPSTREAM_GIT = https://bitbucket.org/zzzeek/dogpile.cache.git
 include /usr/share/openstack-pkg-tools/pkgos.make
 
 %:

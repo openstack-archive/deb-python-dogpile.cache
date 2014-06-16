@@ -2,6 +2,73 @@
 Changelog
 ==============
 .. changelog::
+    :version: 0.5.4
+    :released: Sat Jun 14 2014
+
+    .. change::
+      :tags: feature
+      :pullreq: 18
+
+      Added new :class:`.NullBackend`, for testing and cache-disabling
+      purposes.  Pull request courtesy Wichert Akkerman.
+
+    .. change::
+      :tags: bug
+      :pullreq: 19
+
+      Added missing Mako test dependency to setup.py.
+      Pull request courtesy Wichert Akkerman.
+
+    .. change::
+      :tags: bug
+      :tickets: 58
+      :pullreq: 20
+
+      Fixed bug where calling :meth:`.CacheRegion.get_multi` or
+      :meth:`.CacheRegion.set_multi` with an empty list would cause failures
+      based on backend.  Pull request courtesy Wichert Akkerman.
+
+    .. change::
+      :tags: feature
+      :pullreq: 17
+
+      Added new :paramref:`.RedisBackend.connection_pool` option
+      on the Redis backend; this can be passed a ``redis.ConnectionPool``
+      instance directly.  Pull request courtesy Masayuko.
+
+    .. change::
+      :tags: feature
+      :pullreq: 16
+
+      Added new :paramref:`.RedisBackend.socket_timeout` option
+      on the Redis backend.  Pull request courtesy
+      Saulius Menkevičius.
+
+    .. change::
+      :tags: feature
+
+      Added support for tests to run via py.test.
+
+    .. change::
+      :tags: bug
+      :pullreq: 15
+
+      Repaired the entry point for Mako templates; the name of the entrypoint
+      itself was wrong vs. what was in the docs, but beyond that the entrypoint
+      would load the wrong module name.  Pull request courtesy zoomorph.
+
+    .. change::
+    	:tags: bug
+    	:tickets: 57
+    	:pullreq: 13
+
+      The :func:`.coerce_string_conf` function, which is used by
+      :meth:`.Region.configure_from_config`, will now recognize floating point
+      values when parsing conf strings and deliver them as such; this supports
+      non-integer values such as Redis ``lock_sleep``.  Pullreq courtesy
+      Jeff Dairiki.
+
+.. changelog::
     :version: 0.5.3
     :released: Wed Jan 8 2014
 

@@ -39,6 +39,8 @@ Backends
 .. automodule:: dogpile.cache.proxy
     :members:
 
+.. automodule:: dogpile.cache.backends.null
+    :members:
 
 Plugins
 ========

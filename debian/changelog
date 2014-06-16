@@ -1,7 +1,7 @@
 python-dogpile.cache (0.5.4-1) unstable; urgency=medium
 
   * New upstream release.
-  * Added Python3 support, and build the sphinx doc.
+  * Added Python3 support (Closes: #751739), and build the sphinx doc.
 
  -- Thomas Goirand <zigo@debian.org>  Mon, 16 Jun 2014 17:23:35 +0800
 

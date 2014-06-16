@@ -1,0 +1,9 @@
+Document: python-dogpile.cache-doc
+Title: Dogpile.cache Documentation
+Author: Mike Bayer <mike_mp@zzzcomputing.com>
+Abstract: Sphinx documentation for Dogpile.cache
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-dogpile.cache-doc/html/index.html
+Files: /usr/share/doc/python-dogpile.cache-doc/html/*

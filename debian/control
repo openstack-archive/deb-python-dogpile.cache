@@ -8,11 +8,19 @@ Uploaders: Julien Danjou <acid@debian.org>,
 Build-Depends: debhelper (>= 9),
                openstack-pkg-tools,
                python-all (>= 2.6.6-3~),
-               python-setuptools
-Build-Depends-Indep: python-dogpile.core,
+               python-setuptools,
+               python-sphinx,
+               python3-all (>= 3.2),
+               python3-setuptools
+Build-Depends-Indep: python-changelog,
+                     python-dogpile.core,
                      python-mock,
                      python-nose,
-                     python-nosexcover
+                     python-nosexcover,
+                     python-sphinx-paramlinks,
+                     python3-dogpile.core,
+                     python3-mock,
+                     python3-nose
 Standards-Version: 3.9.5
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-dogpile.cache.git
 Vcs-Git: git://anonscm.debian.org/openstack/python-dogpile.cache.git
@@ -23,7 +31,7 @@ Architecture: all
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: ${misc:Depends}, ${python:Depends}
 Recommends: ${python:Recommends}
-Description: caching front-end based on the Dogpile lock
+Description: caching front-end based on the Dogpile lock - Python 2.x
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a
  new value.
@@ -36,3 +44,47 @@ Description: caching front-end based on the Dogpile lock
  by the same author. All the ideas of Beaker which "work" are re-implemented in
  dogpile.cache in a more efficient and succinct manner, and all the cruft
  (Beaker's internals were first written in 2005) relegated to the trash heap.
+ .
+ This package provides the Python 2.x module.
+
+Package: python3-dogpile.cache
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${misc:Depends}, ${python3:Depends}
+Recommends: ${python:Recommends}
+Description: caching front-end based on the Dogpile lock - Python 3.x
+ A caching API built around the concept of a "dogpile lock", which allows
+ continued access to an expiring data value while a single thread generates a
+ new value.
+ .
+ dogpile.cache builds on the dogpile.core locking system
+ (see http://pypi.python.org/pypi/dogpile.core), which implements the idea of
+ "allow one creator to write while others read" in the abstract. Overall,
+ dogpile.cache is intended as a replacement to the Beaker (see
+ http://beaker.groovie.org) caching system, the internals of which are written
+ by the same author. All the ideas of Beaker which "work" are re-implemented in
+ dogpile.cache in a more efficient and succinct manner, and all the cruft
+ (Beaker's internals were first written in 2005) relegated to the trash heap.
+ .
+ This package provides the Python 3.x module.
+
+Package: python-dogpile.cache-doc
+Section: doc
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${misc:Depends}, ${sphinxdoc:Depends}
+Description: caching front-end based on the Dogpile lock - doc
+ A caching API built around the concept of a "dogpile lock", which allows
+ continued access to an expiring data value while a single thread generates a
+ new value.
+ .
+ dogpile.cache builds on the dogpile.core locking system
+ (see http://pypi.python.org/pypi/dogpile.core), which implements the idea of
+ "allow one creator to write while others read" in the abstract. Overall,
+ dogpile.cache is intended as a replacement to the Beaker (see
+ http://beaker.groovie.org) caching system, the internals of which are written
+ by the same author. All the ideas of Beaker which "work" are re-implemented in
+ dogpile.cache in a more efficient and succinct manner, and all the cruft
+ (Beaker's internals were first written in 2005) relegated to the trash heap.
+ .
+ This package provides the documentation.

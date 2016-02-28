@@ -24,7 +24,7 @@ Build-Depends-Indep: python-changelog,
 Standards-Version: 3.9.5
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-dogpile.cache.git
 Vcs-Git: git://anonscm.debian.org/openstack/python-dogpile.cache.git
-Homepage: http://bitbucket.org/zzzeek/dogpile.cache
+Homepage: https://bitbucket.org/zzzeek/dogpile.cache
 
 Package: python-dogpile.cache
 Architecture: all

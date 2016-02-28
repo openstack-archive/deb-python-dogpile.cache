@@ -1,6 +1,7 @@
 python-dogpile.cache (0.5.4-2) UNRELEASED; urgency=medium
 
   * Fixed homepage (https).
+  * Fixed VCS URLs (https).
 
  -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:36:51 +0100
 

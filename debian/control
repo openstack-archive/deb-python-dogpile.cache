@@ -22,8 +22,8 @@ Build-Depends-Indep: python-changelog,
                      python3-mock,
                      python3-nose
 Standards-Version: 3.9.5
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-dogpile.cache.git
-Vcs-Git: git://anonscm.debian.org/openstack/python-dogpile.cache.git
+Vcs-Browser: https://anonscm.debian.org/cgit/openstack/python-dogpile.cache.git/
+Vcs-Git: https://anonscm.debian.org/git/openstack/python-dogpile.cache.git
 Homepage: https://bitbucket.org/zzzeek/dogpile.cache
 
 Package: python-dogpile.cache

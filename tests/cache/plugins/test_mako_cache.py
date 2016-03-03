@@ -1,17 +1,20 @@
 from .. import eq_
 from unittest import TestCase
-from nose import SkipTest
+import pytest
+
 
 try:
-    import mako
+    import mako  # noqa
 except ImportError:
-    raise SkipTest("this test suite requires mako templates")
+    raise pytest.skip("this test suite requires mako templates")
 
 from mako.template import Template
 from mako.cache import register_plugin
 import mock
 
-register_plugin("dogpile.cache", "dogpile.cache.plugins.mako_cache", "MakoPlugin")
+register_plugin(
+    "dogpile.cache", "dogpile.cache.plugins.mako_cache", "MakoPlugin")
+
 
 class TestMakoPlugin(TestCase):
 

@@ -1,24 +1,25 @@
-from dogpile.cache.api import CacheBackend, CachedValue, NO_VALUE
-from dogpile.cache import register_backend, CacheRegion, util
+from dogpile.cache.api import CacheBackend, NO_VALUE
+from dogpile.cache import register_backend, CacheRegion
 from dogpile.cache.region import _backend_loader
 from . import eq_, assert_raises_message
 import itertools
 import time
-from nose import SkipTest
+import pytest
 from threading import Thread, Lock
-from dogpile.cache.compat import thread
 from unittest import TestCase
 import random
 import collections
 
+
 class _GenericBackendFixture(object):
+
     @classmethod
     def setup_class(cls):
         try:
             backend_cls = _backend_loader.load(cls.backend)
             backend = backend_cls(cls.config_args.get('arguments', {}))
         except ImportError:
-            raise SkipTest("Backend %s not installed" % cls.backend)
+            pytest.skip("Backend %s not installed" % cls.backend)
         cls._check_backend_available(backend)
 
     def tearDown(self):
@@ -57,7 +58,6 @@ class _GenericBackendFixture(object):
         existing_key_mangler = self._region_inst.key_mangler
         self._region_inst.key_mangler = _store_keys
 
-
         reg.configure(backend or self.backend, **_config_args)
         return reg
 
@@ -66,6 +66,7 @@ class _GenericBackendFixture(object):
         _config_args = self.config_args.copy()
         self._backend_inst = backend_cls(_config_args.get('arguments', {}))
         return self._backend_inst
+
 
 class _GenericBackendTest(_GenericBackendFixture, TestCase):
 
@@ -101,9 +102,18 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
         eq_(values['key2'], reg.get('key2'))
         eq_(values['key3'], reg.get('key3'))
 
+    def test_region_get_zero_multiple_values(self):
+        reg = self._region()
+        eq_(reg.get_multi([]), [])
+
     def test_region_set_zero_multiple_values(self):
         reg = self._region()
         reg.set_multi({})
+
+    def test_region_set_zero_multiple_values_w_decorator(self):
+        reg = self._region()
+        values = reg.get_or_create_multi([], lambda: 0)
+        eq_(values, [])
 
     def test_region_get_multiple_values(self):
         reg = self._region()
@@ -120,14 +130,16 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
 
     def test_region_get_nothing_multiple(self):
         reg = self._region()
+        reg.delete_multi(['key1', 'key2', 'key3', 'key4', 'key5'])
         values = {'key1': 'value1', 'key3': 'value3', 'key5': 'value5'}
         reg.set_multi(values)
-        reg_values = reg.get_multi(['key1', 'key2', 'key3', 'key4', 'key5', 'key6'])
+        reg_values = reg.get_multi(
+            ['key1', 'key2', 'key3', 'key4', 'key5', 'key6'])
         eq_(
             reg_values,
             ["value1", NO_VALUE, "value3", NO_VALUE,
                 "value5", NO_VALUE
-            ]
+             ]
         )
 
     def test_region_get_empty_multiple(self):
@@ -147,10 +159,12 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
 
     def test_region_set_get_nothing(self):
         reg = self._region()
+        reg.delete_multi(["some key"])
         eq_(reg.get("some key"), NO_VALUE)
 
     def test_region_creator(self):
         reg = self._region()
+
         def creator():
             return "some value"
         eq_(reg.get_or_create("some key", creator), "some value")
@@ -162,36 +176,42 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
         reg = self._region(config_args={"expiration_time": .25})
         lock = Lock()
         canary = []
+
         def creator():
             ack = lock.acquire(False)
             canary.append(ack)
-            time.sleep(.5)
+            time.sleep(.25)
             if ack:
                 lock.release()
             return "some value"
+
         def f():
             for x in range(5):
                 reg.get_or_create("some key", creator)
                 time.sleep(.5)
 
-        threads = [Thread(target=f) for i in range(5)]
+        threads = [Thread(target=f) for i in range(10)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
-        assert len(canary) > 3
-        assert False not in canary
+        assert len(canary) > 2
+        if not reg.backend.has_lock_timeout():
+            assert False not in canary
+        else:
+            assert False in canary
 
     def test_threaded_get_multi(self):
         reg = self._region(config_args={"expiration_time": .25})
         locks = dict((str(i), Lock()) for i in range(11))
 
         canary = collections.defaultdict(list)
+
         def creator(*keys):
             assert keys
             ack = [locks[key].acquire(False) for key in keys]
 
-            #print(
+            # print(
             #        ("%s " % thread.get_ident()) + \
             #        ", ".join(sorted("%s=%s" % (key, acq)
             #                    for acq, key in zip(ack, keys)))
@@ -206,12 +226,13 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
                 if acq:
                     locks[key].release()
             return ["some value %s" % k for k in keys]
+
         def f():
             for x in range(5):
                 reg.get_or_create_multi(
                     [str(random.randint(1, 10))
                         for i in range(random.randint(1, 5))],
-                            creator)
+                    creator)
                 time.sleep(.5)
         f()
         return
@@ -225,7 +246,6 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
         for l in canary.values():
             assert False not in l
 
-
     def test_region_delete(self):
         reg = self._region()
         reg.set("some key", "some value")
@@ -236,6 +256,7 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
     def test_region_expire(self):
         reg = self._region(config_args={"expiration_time": .25})
         counter = itertools.count(1)
+
         def creator():
             return "some value %d" % next(counter)
         eq_(reg.get_or_create("some key", creator), "some value 1")
@@ -256,6 +277,11 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
         def my_function(x, y):
             return next(counter) + x + y
 
+        # Start with a clean slate
+        my_function.invalidate(3, 4)
+        my_function.invalidate(5, 6)
+        my_function.invalidate(4, 3)
+
         eq_(my_function(3, 4), 8)
         eq_(my_function(5, 6), 13)
         eq_(my_function(3, 4), 8)
@@ -266,6 +292,7 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
 
     def test_exploding_value_fn(self):
         reg = self._region()
+
         def boom():
             raise Exception("boom")
 
@@ -275,7 +302,9 @@ class _GenericBackendTest(_GenericBackendFixture, TestCase):
             reg.get_or_create, "some_key", boom
         )
 
+
 class _GenericMutexTest(_GenericBackendFixture, TestCase):
+
     def test_mutex(self):
         backend = self._backend()
         mutex = backend.get_mutex("foo")
@@ -291,10 +320,11 @@ class _GenericMutexTest(_GenericBackendFixture, TestCase):
 
     def test_mutex_threaded(self):
         backend = self._backend()
-        mutex = backend.get_mutex("foo")
+        backend.get_mutex("foo")
 
         lock = Lock()
         canary = []
+
         def f():
             for x in range(5):
                 mutex = backend.get_mutex("foo")
@@ -334,6 +364,7 @@ class _GenericMutexTest(_GenericBackendFixture, TestCase):
 
     def test_reentrant_dogpile(self):
         reg = self._region()
+
         def create_foo():
             return "foo" + reg.get_or_create("bar", create_bar)
 
@@ -349,25 +380,34 @@ class _GenericMutexTest(_GenericBackendFixture, TestCase):
             "foobar"
         )
 
+
 class MockMutex(object):
+
     def __init__(self, key):
         self.key = key
+
     def acquire(self, blocking=True):
         return True
+
     def release(self):
         return
 
+
 class MockBackend(CacheBackend):
+
     def __init__(self, arguments):
         self.arguments = arguments
         self._cache = {}
+
     def get_mutex(self, key):
         return MockMutex(key)
+
     def get(self, key):
         try:
             return self._cache[key]
         except KeyError:
             return NO_VALUE
+
     def get_multi(self, keys):
         return [
             self.get(key) for key in keys
@@ -375,11 +415,14 @@ class MockBackend(CacheBackend):
 
     def set(self, key, value):
         self._cache[key] = value
+
     def set_multi(self, mapping):
-        for key,value in mapping.items():
+        for key, value in mapping.items():
             self.set(key, value)
+
     def delete(self, key):
         self._cache.pop(key, None)
+
     def delete_multi(self, keys):
         for key in keys:
             self.delete(key)

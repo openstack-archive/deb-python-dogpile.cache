@@ -1,10 +1,12 @@
 from dogpile.cache.region import _backend_loader
 from ._fixtures import _GenericBackendTest, _GenericMutexTest
 from unittest import TestCase
-from nose import SkipTest
 from mock import patch, Mock
+import pytest
+
 
 class _TestRedisConn(object):
+
     @classmethod
     def _check_backend_available(cls, backend):
         try:
@@ -14,7 +16,7 @@ class _TestRedisConn(object):
             assert client.get("x").decode("ascii") == "y"
             client.delete("x")
         except:
-            raise SkipTest(
+            pytest.skip(
                 "redis is not running or "
                 "otherwise not functioning correctly")
 
@@ -26,7 +28,7 @@ class RedisTest(_TestRedisConn, _GenericBackendTest):
             'host': '127.0.0.1',
             'port': 6379,
             'db': 0,
-            }
+        }
     }
 
 
@@ -38,8 +40,9 @@ class RedisDistributedMutexTest(_TestRedisConn, _GenericMutexTest):
             'port': 6379,
             'db': 0,
             'distributed_lock': True,
-            }
+        }
     }
+
 
 @patch('redis.StrictRedis', autospec=True)
 class RedisConnectionTest(TestCase):
@@ -51,7 +54,7 @@ class RedisConnectionTest(TestCase):
             cls.backend_cls = _backend_loader.load(cls.backend)
             cls.backend_cls({})
         except ImportError:
-            raise SkipTest("Backend %s not installed" % cls.backend)
+            pytest.skip("Backend %s not installed" % cls.backend)
 
     def _test_helper(self, mock_obj, expected_args, connection_args=None):
         if connection_args is None:
@@ -68,7 +71,7 @@ class RedisConnectionTest(TestCase):
             'password': None,
             'port': 6379,
             'db': 0,
-            }
+        }
         self._test_helper(MockStrictRedis, arguments, {})
 
     def test_connect_with_basics(self, MockStrictRedis):
@@ -77,7 +80,7 @@ class RedisConnectionTest(TestCase):
             'password': None,
             'port': 6379,
             'db': 0,
-            }
+        }
         self._test_helper(MockStrictRedis, arguments)
 
     def test_connect_with_password(self, MockStrictRedis):
@@ -86,7 +89,7 @@ class RedisConnectionTest(TestCase):
             'password': 'some password',
             'port': 6379,
             'db': 0,
-            }
+        }
         self._test_helper(MockStrictRedis, arguments)
 
     def test_connect_with_socket_timeout(self, MockStrictRedis):
@@ -96,7 +99,7 @@ class RedisConnectionTest(TestCase):
             'socket_timeout': 0.5,
             'password': None,
             'db': 0,
-            }
+        }
         self._test_helper(MockStrictRedis, arguments)
 
     def test_connect_with_connection_pool(self, MockStrictRedis):
@@ -104,10 +107,10 @@ class RedisConnectionTest(TestCase):
         arguments = {
             'connection_pool': pool,
             'socket_timeout': 0.5
-            }
+        }
         expected_args = {'connection_pool': pool}
         self._test_helper(MockStrictRedis, expected_args,
-                connection_args=arguments)
+                          connection_args=arguments)
 
     def test_connect_with_url(self, MockStrictRedis):
         arguments = {

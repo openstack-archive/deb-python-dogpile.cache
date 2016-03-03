@@ -1,20 +1,19 @@
 from ._fixtures import _GenericBackendTest, _GenericMutexTest
-from . import eq_, assert_raises_message
-from unittest import TestCase
-from threading import Thread
-import time
+from . import assert_raises_message
 import os
-from nose import SkipTest
+import sys
 from dogpile.core.readwrite_lock import ReadWriteMutex
 from dogpile.cache.backends.file import AbstractFileLock
 
 try:
-    import fcntl
+    import fcntl  # noqa
     has_fcntl = True
 except ImportError:
     has_fcntl = False
 
+
 class MutexLock(AbstractFileLock):
+
     def __init__(self, filename):
         self.mutex = ReadWriteMutex()
 
@@ -32,22 +31,25 @@ class MutexLock(AbstractFileLock):
     def release_write_lock(self):
         return self.mutex.release_write_lock()
 
+test_fname = "test_%s.db" % sys.hexversion
+
 if has_fcntl:
     class DBMBackendTest(_GenericBackendTest):
         backend = "dogpile.cache.dbm"
 
         config_args = {
             "arguments": {
-                "filename": "test.dbm"
+                "filename": test_fname
             }
         }
+
 
 class DBMBackendConditionTest(_GenericBackendTest):
     backend = "dogpile.cache.dbm"
 
     config_args = {
         "arguments": {
-            "filename": "test.dbm",
+            "filename": test_fname,
             "lock_factory": MutexLock
         }
     }
@@ -58,7 +60,7 @@ class DBMBackendNoLockTest(_GenericBackendTest):
 
     config_args = {
         "arguments": {
-            "filename": "test.dbm",
+            "filename": test_fname,
             "rw_lockfile": False,
             "dogpile_lockfile": False,
         }
@@ -96,7 +98,7 @@ if has_fcntl:
     class DBMMutexFileTest(_DBMMutexTest):
         config_args = {
             "arguments": {
-                "filename": "test.dbm"
+                "filename": test_fname,
             }
         }
 
@@ -104,7 +106,7 @@ if has_fcntl:
 class DBMMutexConditionTest(_DBMMutexTest):
     config_args = {
         "arguments": {
-            "filename": "test.dbm",
+            "filename": test_fname,
             "lock_factory": MutexLock
         }
     }
@@ -112,5 +114,5 @@ class DBMMutexConditionTest(_DBMMutexTest):
 
 def teardown():
     for fname in os.listdir(os.curdir):
-        if fname.startswith("test.dbm"):
+        if fname.startswith(test_fname):
             os.unlink(fname)

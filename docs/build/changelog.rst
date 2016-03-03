@@ -2,6 +2,102 @@
 Changelog
 ==============
 .. changelog::
+    :version: 0.5.7
+    :released: Mon Oct 19 2015
+
+    .. change::
+      :tags: feature
+      :pullreq: 37
+      :tickets: 54
+
+      Added new parameter :paramref:`.GenericMemcachedBackend.lock_timeout`,
+      used in conjunction with
+      :paramref:`.GenericMemcachedBackend.distributed_lock`, will specify the
+      timeout used when communicating to the ``.add()`` method of the memcached
+      client.  Pull request courtesy Frits Stegmann and Morgan Fainberg.
+
+    .. change::
+      :tags: feature
+      :pullreq: 35
+      :tickets: 65
+
+      Added a new flag :paramref:`.CacheRegion.configure.replace_existing_backend`,
+      allows a region to have a new backend replace an existing one.
+      Pull request courtesy hbccbh.
+
+    .. change::
+      :tags: feature, tests
+      :pullreq: 33
+
+      Test suite now runs using py.test.  Pull request courtesy
+      John Anderson.
+
+    .. change::
+      :tags: bug, redis
+      :tickets: 74
+
+      Repaired the :meth:`.CacheRegion.get_multi` method when used with a
+      list of zero length against the redis backend.
+
+.. changelog::
+    :version: 0.5.6
+    :released: Mon Feb 2 2015
+
+    .. change::
+      :tags: feature
+      :pullreq: 30
+
+      Changed the pickle protocol for the file/DBM backend to
+      ``pickle.HIGHEST_PROTOCOL`` when producing new pickles,
+      to match that of the redis and memorypickle backends.
+      Pull request courtesy anentropic.
+
+.. changelog::
+    :version: 0.5.5
+    :released: Wed Jan 21 2015
+
+    .. change::
+      :tags: feature
+      :pullreq: 26
+
+      Added new arguments
+      :paramref:`.CacheRegion.cache_on_arguments.function_key_generator` and
+      :paramref:`.CacheRegion.cache_multi_on_arguments.function_multi_key_generator`
+      which serve as per-decorator replacements for the region-wide
+      :paramref:`.CacheRegion.function_key_generator` and
+      :paramref:`.CacheRegion.function_multi_key_generator` parameters,
+      respectively, so that custom key production schemes can be applied
+      on a per-function basis within one region.
+      Pull request courtesy Hongbin Lu.
+
+    .. change::
+      :tags: bug
+      :tickets: 71
+      :pullreq: 25
+
+      Fixed bug where sending -1 for the
+      :paramref:`.CacheRegion.get_or_create.expiration_time` parameter to
+      :meth:`.CacheRegion.get_or_create` or
+      :meth:`.CacheRegion.get_or_create_multi`
+      would fail to honor the setting as "no expiration time".  Pull request
+      courtesy Hongbin Lu.
+
+    .. change::
+      :tags: bug
+      :tickets: 41
+      :pullreq: 28
+
+      The ``wrap`` argument is now propagated when calling
+      :meth:`.CacheRegion.configure_from_config`.  Pull request courtesy
+      Jonathan Vanasco.
+
+    .. change::
+      :tags: bug
+
+      Fixed tests under py.test, which were importing a symbol from
+      pytest itself ``is_unittest`` which has been removed.
+
+.. changelog::
     :version: 0.5.4
     :released: Sat Jun 14 2014
 

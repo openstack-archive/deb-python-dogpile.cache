@@ -1,9 +1,13 @@
-python-dogpile.cache (0.5.4-2) UNRELEASED; urgency=medium
+python-dogpile.cache (0.5.7-1) experimental; urgency=medium
 
+  [ Ondřej Nový ]
   * Fixed homepage (https).
   * Fixed VCS URLs (https).
 
- -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:36:51 +0100
+  [ Thomas Goirand ]
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 03 Mar 2016 20:34:59 +0000
 
 python-dogpile.cache (0.5.4-1) unstable; urgency=medium
 

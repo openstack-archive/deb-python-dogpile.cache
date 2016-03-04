@@ -6,6 +6,8 @@ python-dogpile.cache (0.5.7-1) experimental; urgency=medium
 
   [ Thomas Goirand ]
   * New upstream release.
+  * Fixed debian/copyright ordering.
+  * Standards-Version: 3.9.7 (no change).
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 03 Mar 2016 20:34:59 +0000
 

@@ -3,16 +3,11 @@ Upstream-Name: dogpile.cache
 Upstream-Contact: Mike Bayer <mike_mp@zzzcomputing.com>
 Source: https://bitbucket.org/zzzeek/dogpile.cache.git
 
-Files: debian/*
-Copyright: (c) 2013, Thomas Goirand <zigo@debian.org>
-License: BSD-3-clause
-
 Files: *
-Copyright: (c) 2013, Mike Bayer <mike_mp@zzzcomputing.com>
+Copyright: (c) 2013-2016, Mike Bayer <mike_mp@zzzcomputing.com>
            (c) 2013, Marcos A. Sobrinho <equake@gmail.com>
            (c) 2013, timhanus <timhanus@gmail.com>
            (c) 2013, Ralph Bean <rbean@redhat.com>
-           (c) 2013, zzzeek <classic@zzzcomputing.com>
            (c) 2013, Lx Yu <lixinfish@gmail.com>
            (c) 2013, Alexander Fedorov@winwork <Alexander Fedorov@winwork>
            (c) 2013, Jon Rosebaugh <jon@inklesspen.com>
@@ -28,6 +23,10 @@ Copyright: (c) 2013, Mike Bayer <mike_mp@zzzcomputing.com>
            (c) 2013, Gunnlaugur Thor Briem <gunnlaugur@gmail.com>
            (c) 2013, goschtl <none@none>
            (c) 2013, David Beitey <david@davidjb.com>
+License: BSD-3-clause
+
+Files: debian/*
+Copyright: (c) 2013-2016, Thomas Goirand <zigo@debian.org>
 License: BSD-3-clause
 
 License: BSD-3-clause

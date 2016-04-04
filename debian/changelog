@@ -1,6 +1,7 @@
 python-dogpile.cache (0.5.7-2) unstable; urgency=medium
 
   * Uploading to unstable.
+  * Added python-pytest as build-depends-indep.
 
  -- Thomas Goirand <zigo@debian.org>  Mon, 04 Apr 2016 07:57:12 +0000
 

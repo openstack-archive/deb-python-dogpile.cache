@@ -1,2 +1,2 @@
 Tests: import
-Depends: python-dogpile.core
+Depends: python-dogpile.cache, python3-dogpile.cache

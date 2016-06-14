@@ -19,10 +19,12 @@ override_dh_auto_install:
 			--root $(CURDIR)/debian/python3-dogpile.cache; \
 	done
 
+TEST_ARGS := "-k 'not test_dbm_backend and not test_memcached_backend and not test_redis_backend'"
+
 override_dh_auto_test:
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
-	PYTHONPATH=. nosetests || true
-	PYTHONPATH=. nosetests3 || true
+	PYTHONPATH=. python -m pytest $(TEST_ARGS)
+	PYTHONPATH=. python3 -m pytest $(TEST_ARGS)
 endif
 
 override_dh_sphinxdoc:

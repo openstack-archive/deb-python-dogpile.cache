@@ -2,6 +2,53 @@
 Changelog
 ==============
 .. changelog::
+    :version: 0.6.1
+    :released: Mon Jun 6 2016
+
+    .. change::
+      :tags: bug
+      :tickets: 99
+
+      Fixed imports for ``dogpile.core`` restoring ``ReadWriteMutex``
+      and ``NameRegistry`` into the base namespace, in addition to
+      ``dogpile.core.nameregistry`` and ``dogpile.core.readwrite_lock``.
+
+.. changelog::
+    :version: 0.6.0
+    :released: Mon Jun 6 2016
+
+    .. change::
+      :tags: feature
+      :tickets: 91
+
+      The ``dogpile.core`` library has been rolled in as part of the
+      ``dogpile.cache`` distribution.   The configuration of the ``dogpile``
+      name as a namespace package is also removed from ``dogpile.cache``.
+      In order to allow existing installations of ``dogpile.core`` as a separate
+      package to remain unaffected, the ``.core`` package has been retired
+      within ``dogpile.cache`` directly; the :class:`.Lock` class is now
+      available directly as ``dogpile.Lock`` and the additional ``dogpile.core``
+      constructs are under the ``dogpile.util`` namespace.
+
+      Additionally, the long-deprecated ``dogpile.core.Dogpile`` and
+      ``dogpile.core.SyncReaderDogpile`` classes have been removed.
+
+    .. change::
+      :tags: bug
+
+      The Redis backend now creates a copy of the "arguments" dictionary passed
+      to it, before popping values out of it.  This prevents the given
+      dictionary from losing its keys.
+
+    .. change::
+      :tags: bug
+      :tickets: 97
+
+      Fixed bug in "null" backend where :class:`.NullLock` did not
+      accept a flag for the :meth:`.NullLock.acquire` method, nor did
+      it return a boolean value for "success".
+
+.. changelog::
     :version: 0.5.7
     :released: Mon Oct 19 2015
 

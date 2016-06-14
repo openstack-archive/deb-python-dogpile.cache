@@ -28,7 +28,7 @@ class PyTest(TestCommand):
 v = open(
     os.path.join(
         os.path.dirname(__file__),
-        'dogpile', 'cache', '__init__.py')
+        'dogpile', '__init__.py')
 )
 VERSION = re.compile(r".*__version__ = '(.*?)'", re.S).match(v.read()).group(1)
 v.close()
@@ -41,7 +41,7 @@ setup(
     description="A caching front-end based on the Dogpile lock.",
     long_description=open(readme).read(),
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
@@ -52,14 +52,12 @@ setup(
     author_email='mike_mp@zzzcomputing.com',
     url='http://bitbucket.org/zzzeek/dogpile.cache',
     license='BSD',
-    packages=find_packages('.', exclude=['ez_setup', 'tests*']),
-    namespace_packages=['dogpile'],
+    packages=find_packages('.', exclude=['tests*']),
     entry_points="""
     [mako.cache]
     dogpile.cache = dogpile.cache.plugins.mako_cache:MakoPlugin
     """,
     zip_safe=False,
-    install_requires=['dogpile.core>=0.4.1'],
     tests_require=['pytest', 'pytest-cov', 'mock', 'Mako'],
     cmdclass={'test': PyTest},
 )

@@ -4,7 +4,12 @@ from unittest import TestCase
 from threading import Thread
 import time
 import pytest
-from dogpile.cache import compat
+from dogpile.util import compat
+import os
+
+
+MEMCACHED_PORT = os.getenv('DOGPILE_MEMCACHED_PORT', '11211')
+MEMCACHED_URL = "127.0.0.1:%s" % MEMCACHED_PORT
 
 LOCK_TIMEOUT = 1
 
@@ -29,7 +34,7 @@ class _NonDistributedMemcachedTest(_TestMemcachedConn, _GenericBackendTest):
     }
     config_args = {
         "arguments": {
-            "url": "127.0.0.1:11211"
+            "url": MEMCACHED_URL
         }
     }
 
@@ -40,7 +45,7 @@ class _DistributedMemcachedWithTimeoutTest(_TestMemcachedConn, _GenericBackendTe
     }
     config_args = {
         "arguments": {
-            "url": "127.0.0.1:11211",
+            "url": MEMCACHED_URL,
             "distributed_lock": True,
             "lock_timeout": LOCK_TIMEOUT,
         }
@@ -53,7 +58,7 @@ class _DistributedMemcachedTest(_TestMemcachedConn, _GenericBackendTest):
     }
     config_args = {
         "arguments": {
-            "url": "127.0.0.1:11211",
+            "url": MEMCACHED_URL,
             "distributed_lock": True,
         }
     }
@@ -62,7 +67,7 @@ class _DistributedMemcachedTest(_TestMemcachedConn, _GenericBackendTest):
 class _DistributedMemcachedMutexTest(_TestMemcachedConn, _GenericMutexTest):
     config_args = {
         "arguments": {
-            "url": "127.0.0.1:11211",
+            "url": MEMCACHED_URL,
             "distributed_lock": True
         }
     }
@@ -71,7 +76,7 @@ class _DistributedMemcachedMutexTest(_TestMemcachedConn, _GenericMutexTest):
 class _DistributedMemcachedMutexWithTimeoutTest(_TestMemcachedConn, _GenericMutexTest):
     config_args = {
         "arguments": {
-            "url": "127.0.0.1:11211",
+            "url": MEMCACHED_URL,
             "distributed_lock": True,
             "lock_timeout": LOCK_TIMEOUT,
         }
@@ -90,23 +95,38 @@ class PylibmcDistributedMutexTest(_DistributedMemcachedMutexTest):
     backend = "dogpile.cache.pylibmc"
 
 
-class BMemcachedTest(_NonDistributedMemcachedTest):
+class BMemcachedSkips(object):
+    def test_threaded_dogpile(self):
+        pytest.skip("bmemcached is too unreliable here")
+
+    def test_threaded_get_multi(self):
+        pytest.skip("bmemcached is too unreliable here")
+
+    def test_mutex_threaded_dogpile(self):
+        pytest.skip("bmemcached is too unreliable here")
+
+
+class BMemcachedTest(BMemcachedSkips, _NonDistributedMemcachedTest):
     backend = "dogpile.cache.bmemcached"
 
 
-class BMemcachedDistributedWithTimeoutTest(_DistributedMemcachedWithTimeoutTest):
+class BMemcachedDistributedWithTimeoutTest(
+        BMemcachedSkips, _DistributedMemcachedWithTimeoutTest):
     backend = "dogpile.cache.bmemcached"
 
 
-class BMemcachedDistributedTest(_DistributedMemcachedTest):
+class BMemcachedDistributedTest(
+        BMemcachedSkips, _DistributedMemcachedTest):
     backend = "dogpile.cache.bmemcached"
 
 
-class BMemcachedDistributedMutexTest(_DistributedMemcachedMutexTest):
+class BMemcachedDistributedMutexTest(
+        BMemcachedSkips, _DistributedMemcachedMutexTest):
     backend = "dogpile.cache.bmemcached"
 
 
-class BMemcachedDistributedMutexWithTimeoutTest(_DistributedMemcachedMutexWithTimeoutTest):
+class BMemcachedDistributedMutexWithTimeoutTest(
+        BMemcachedSkips, _DistributedMemcachedMutexWithTimeoutTest):
     backend = "dogpile.cache.bmemcached"
 
 
@@ -265,6 +285,8 @@ class LocalThreadTest(TestCase):
             t.join()
         eq_(canary, [i + 1 for i in range(count)])
 
+        import gc
+        gc.collect()
         if compat.py27:
             eq_(MockClient.number_of_clients, 0)
         else:

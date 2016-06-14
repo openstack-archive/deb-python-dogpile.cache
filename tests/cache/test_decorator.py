@@ -4,7 +4,8 @@ from ._fixtures import _GenericBackendFixture
 from . import eq_, requires_py3k, winsleep
 from unittest import TestCase
 import time
-from dogpile.cache import util, compat
+from dogpile.cache import util
+from dogpile.util import compat
 import itertools
 from dogpile.cache.api import NO_VALUE
 
@@ -308,6 +309,18 @@ class CacheDecoratorTest(_GenericBackendFixture, TestCase):
         eq_(generate(1, 2), 4)
         generate.invalidate(1, 2)
         eq_(generate(1, 2), 6)
+
+    def test_original_fn_set(self):
+        reg = self._region(backend="dogpile.cache.memory")
+
+        counter = itertools.count(1)
+
+        def generate(x, y):
+            return next(counter) + x + y
+
+        decorated = reg.cache_on_arguments()(generate)
+
+        eq_(decorated.original, generate)
 
     def test_reentrant_call(self):
         reg = self._region(backend="dogpile.cache.memory")

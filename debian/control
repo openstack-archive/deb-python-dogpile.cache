@@ -35,6 +35,8 @@ Architecture: all
 Depends: ${misc:Depends},
          ${python:Depends},
 Recommends: ${python:Recommends},
+Breaks: python-dogpile.core (<< 0.6.1-1~),
+Replaces: python-dogpile.core (<< 0.6.1-1~),
 Description: caching front-end based on the Dogpile lock - Python 2.x
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a
@@ -56,6 +58,8 @@ Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
 Recommends: ${python:Recommends},
+Breaks: python3-dogpile.core (<< 0.6.1-1~),
+Replaces: python3-dogpile.core (<< 0.6.1-1~),
 Description: caching front-end based on the Dogpile lock - Python 3.x
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a
@@ -92,3 +96,17 @@ Description: caching front-end based on the Dogpile lock - doc
  (Beaker's internals were first written in 2005) relegated to the trash heap.
  .
  This package provides the documentation.
+
+Package: python-dogpile.core
+Architecture: all
+Depends: python-dogpile.cache,
+         ${misc:Depends},
+Description: transitional dummy package for python-dogpile.core
+ This transitional package is safe to remove.
+
+Package: python3-dogpile.core
+Architecture: all
+Depends: python3-dogpile.cache,
+         ${misc:Depends},
+Description: transitional dummy package for python3-dogpile.core
+ This transitional package is safe to remove.

@@ -1,6 +1,15 @@
 python-dogpile.cache (0.5.7-3) UNRELEASED; urgency=medium
 
+  [ Ondřej Nový ]
   * Standards-Version is 3.9.8 now (no change)
+
+  [ James Page ]
+  * Merge Ubuntu delta into Debian:
+    - Add autopkg tests.
+    - Drop obsolete and undocumented Pre-Depends on a pre-lucid dpkg
+      version. There is no need to run python-dogpile.cache's autopkg
+      tests when a new dpkg version is uploaded.
+    - Build-Depend on python{,3}-coverage.
 
  -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:26:39 +0200
 

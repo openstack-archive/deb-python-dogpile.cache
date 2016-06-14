@@ -4,21 +4,23 @@ Priority: optional
 Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
 Uploaders: Julien Danjou <acid@debian.org>,
            Thomas Goirand <zigo@debian.org>,
-           Mehdi Abaakouk <sileht@sileht.net>
+           Mehdi Abaakouk <sileht@sileht.net>,
 Build-Depends: debhelper (>= 9),
                openstack-pkg-tools,
                python-all (>= 2.6.6-3~),
                python-setuptools,
                python-sphinx,
                python3-all (>= 3.2),
-               python3-setuptools
+               python3-setuptools,
 Build-Depends-Indep: python-changelog,
+                     python-coverage,
                      python-dogpile.core,
                      python-mock,
                      python-nose,
                      python-nosexcover,
                      python-pytest,
                      python-sphinx-paramlinks,
+                     python3-coverage,
                      python3-dogpile.core,
                      python3-mock,
                      python3-nose,
@@ -30,9 +32,9 @@ Homepage: https://bitbucket.org/zzzeek/dogpile.cache
 
 Package: python-dogpile.cache
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${misc:Depends}, ${python:Depends}
-Recommends: ${python:Recommends}
+Depends: ${misc:Depends},
+         ${python:Depends},
+Recommends: ${python:Recommends},
 Description: caching front-end based on the Dogpile lock - Python 2.x
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a
@@ -51,9 +53,9 @@ Description: caching front-end based on the Dogpile lock - Python 2.x
 
 Package: python3-dogpile.cache
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${misc:Depends}, ${python3:Depends}
-Recommends: ${python:Recommends}
+Depends: ${misc:Depends},
+         ${python3:Depends},
+Recommends: ${python:Recommends},
 Description: caching front-end based on the Dogpile lock - Python 3.x
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a
@@ -73,8 +75,8 @@ Description: caching front-end based on the Dogpile lock - Python 3.x
 Package: python-dogpile.cache-doc
 Section: doc
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends: ${misc:Depends}, ${sphinxdoc:Depends}
+Depends: ${misc:Depends},
+         ${sphinxdoc:Depends},
 Description: caching front-end based on the Dogpile lock - doc
  A caching API built around the concept of a "dogpile lock", which allows
  continued access to an expiring data value while a single thread generates a

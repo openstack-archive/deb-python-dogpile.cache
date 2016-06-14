@@ -10,6 +10,8 @@ python-dogpile.cache (0.6.1-1) UNRELEASED; urgency=medium
       version. There is no need to run python-dogpile.cache's autopkg
       tests when a new dpkg version is uploaded.
     - Build-Depend on python{,3}-coverage.
+  * Drop BD's on python{3}-dogpile.core; dogpile.core is now part
+    of dogpile.cache.
 
  -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:26:39 +0200
 

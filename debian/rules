@@ -19,7 +19,7 @@ override_dh_auto_install:
 			--root $(CURDIR)/debian/python3-dogpile.cache; \
 	done
 
-TEST_ARGS := "-k 'not test_dbm_backend and not test_memcached_backend and not test_redis_backend'"
+TEST_ARGS := -k 'not test_dbm_backend and not test_memcached_backend and not test_redis_backend'
 
 override_dh_auto_test:
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))

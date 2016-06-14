@@ -1,4 +1,4 @@
-python-dogpile.cache (0.6.1-1) UNRELEASED; urgency=medium
+python-dogpile.cache (0.6.1-1) experimental; urgency=medium
 
   [ Ondřej Nový ]
   * Standards-Version is 3.9.8 now (no change)
@@ -19,7 +19,7 @@ python-dogpile.cache (0.6.1-1) UNRELEASED; urgency=medium
   * d/tests: Update to exercise both python2 and python3 imports,
     correct dependencies.
 
- -- Ondřej Nový <novy@ondrej.org>  Sat, 09 Apr 2016 19:26:39 +0200
+ -- James Page <james.page@ubuntu.com>  Tue, 14 Jun 2016 10:50:18 +0100
 
 python-dogpile.cache (0.5.7-2) unstable; urgency=medium
 

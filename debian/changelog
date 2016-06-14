@@ -1,4 +1,4 @@
-python-dogpile.cache (0.5.7-3) UNRELEASED; urgency=medium
+python-dogpile.cache (0.6.1-1) UNRELEASED; urgency=medium
 
   [ Ondřej Nový ]
   * Standards-Version is 3.9.8 now (no change)

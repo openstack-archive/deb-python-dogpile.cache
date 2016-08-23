@@ -1,4 +1,5 @@
 [gerrit]
-host=gerrit.sqlalchemy.org
-project=zzzeek/dogpile.cache
-defaultbranch=master
+host=review.openstack.org
+port=29418
+project=openstack/deb-python-dogpile.cache
+defaultbranch=debian/newton

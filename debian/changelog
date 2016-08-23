@@ -1,3 +1,9 @@
+python-dogpile.cache (0.6.2-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 23 Aug 2016 12:14:20 +0200
+
 python-dogpile.cache (0.6.1-1) experimental; urgency=medium
 
   [ Ondřej Nový ]

@@ -2,6 +2,41 @@
 Changelog
 ==============
 .. changelog::
+    :version: 0.6.2
+    :released: Tue Aug 16 2016
+
+    .. change::
+      :tags: feature
+      :tickets: 38
+
+      Added a new system to allow custom plugins specific to the issue of
+      "invalidate the entire region", using a new base class
+      :class:`.RegionInvalidationStrategy`. As there are many potential
+      strategies to this (special backend function, storing special keys, etc.)
+      the mechanism for both soft and hard invalidation is now customizable.
+      New approaches to region invalidation can be contributed as documented
+      recipes.  Pull request courtesy Alexander Makarov.
+
+    .. change::
+      :tags: feature
+      :tickets: 43
+
+      Added a new cache key generator :func:`.kwarg_function_key_generator`,
+      which takes keyword arguments as well as positional arguments into
+      account when forming the cache key.
+
+    .. change::
+      :tags: bug
+
+      Restored some more util symbols that users may have been relying upon
+      (although these were not necessarily intended as user-facing):
+      ``dogpile.cache.util.coerce_string_conf``,
+      ``dogpile.cache.util.KeyReentrantMutex``,
+      ``dogpile.cache.util.memoized_property``,
+      ``dogpile.cache.util.PluginLoader``,
+      ``dogpile.cache.util.to_list``.
+
+.. changelog::
     :version: 0.6.1
     :released: Mon Jun 6 2016
 

@@ -1,3 +1,10 @@
+python-dogpile.cache (0.6.2-3) UNRELEASED; urgency=medium
+
+  * d/s/options: extend-diff-ignore of .gitreview
+  * d/control: Use correct branch in Vcs-* fields
+
+ -- Ondřej Nový <onovy@debian.org>  Mon, 26 Sep 2016 19:09:28 +0200
+
 python-dogpile.cache (0.6.2-2) experimental; urgency=medium
 
   * Using OpenStack's Gerrit as VCS URLs.

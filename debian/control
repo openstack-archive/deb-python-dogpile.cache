@@ -21,8 +21,8 @@ Build-Depends-Indep: python-changelog,
                      python3-mock,
                      python3-pytest,
 Standards-Version: 3.9.8
-Vcs-Browser: https://git.openstack.org/cgit/openstack/deb-python-dogpile.cache
-Vcs-Git: https://git.openstack.org/openstack/deb-python-dogpile.cache
+Vcs-Browser: https://git.openstack.org/cgit/openstack/deb-python-dogpile.cache?h=debian%2Fnewton
+Vcs-Git: https://git.openstack.org/openstack/deb-python-dogpile.cache -b debian/newton
 Homepage: https://bitbucket.org/zzzeek/dogpile.cache
 
 Package: python-dogpile.cache

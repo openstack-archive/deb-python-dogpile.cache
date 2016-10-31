@@ -1,0 +1,48 @@
+Description: Remove non-deterministic tests
+Author: Thomas Goirand <zigo@debian.org>
+Bug-Debian: https://bugs.debian.org/841516
+Forwarded: no
+Last-Update: 2016-10-31
+
+--- python-dogpile.cache-0.6.2.orig/tests/cache/test_memcached_backend.py
++++ python-dogpile.cache-0.6.2/tests/cache/test_memcached_backend.py
+@@ -261,39 +261,3 @@ class MemcachedArgstest(TestCase):
+         backend.set("foo", "bar")
+         eq_(backend._clients.memcached.canary, [{"min_compress_len": 20}])
+ 
+-
+-class LocalThreadTest(TestCase):
+-
+-    def setUp(self):
+-        import gc
+-        gc.collect()
+-        eq_(MockClient.number_of_clients(), 0)
+-
+-    def test_client_cleanup_1(self):
+-        self._test_client_cleanup(1)
+-
+-    def test_client_cleanup_3(self):
+-        self._test_client_cleanup(3)
+-
+-    def test_client_cleanup_10(self):
+-        self._test_client_cleanup(10)
+-
+-    def _test_client_cleanup(self, count):
+-        backend = MockGenericMemcachedBackend(arguments={'url': 'foo'})
+-        canary = []
+-
+-        def f():
+-            backend._clients.memcached
+-            canary.append(MockClient.number_of_clients())
+-            time.sleep(.05)
+-
+-        threads = [Thread(target=f) for i in range(count)]
+-        for t in threads:
+-            t.start()
+-        for t in threads:
+-            t.join()
+-        eq_(canary, [i + 1 for i in range(count)])
+-
+-        import gc
+-        gc.collect()
+-        eq_(MockClient.number_of_clients(), 0)

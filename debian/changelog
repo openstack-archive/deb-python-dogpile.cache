@@ -1,3 +1,9 @@
+python-dogpile.cache (0.6.2-4) unstable; urgency=medium
+
+  * Adds remove-non-deterministic-tests.patch (Closes: #841516).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 31 Oct 2016 09:20:00 +0100
+
 python-dogpile.cache (0.6.2-3) unstable; urgency=medium
 
   [ Ondřej Nový ]

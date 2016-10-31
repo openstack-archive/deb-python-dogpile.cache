@@ -1,1 +1,2 @@
 no-intersphinx.patch
+remove-non-deterministic-tests.patch

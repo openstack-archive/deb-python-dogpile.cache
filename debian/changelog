@@ -1,3 +1,9 @@
+python-dogpile.cache (0.6.2-5) UNRELEASED; urgency=medium
+
+  * Bumped debhelper compat version to 10
+
+ -- Ondřej Nový <onovy@debian.org>  Thu, 24 Nov 2016 00:05:45 +0100
+
 python-dogpile.cache (0.6.2-4) unstable; urgency=medium
 
   * Adds remove-non-deterministic-tests.patch (Closes: #841516).

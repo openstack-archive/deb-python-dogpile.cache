@@ -1,8 +1,8 @@
-python-dogpile.cache (0.6.2-5) UNRELEASED; urgency=medium
+python-dogpile.cache (0.6.2-5) unstable; urgency=medium
 
-  * Bumped debhelper compat version to 10
+  * Revert another non-deterministic test (Closes: #861173).
 
- -- Ondřej Nový <onovy@debian.org>  Thu, 24 Nov 2016 00:05:45 +0100
+ -- Thomas Goirand <zigo@debian.org>  Tue, 25 Apr 2017 16:27:04 +0200
 
 python-dogpile.cache (0.6.2-4) unstable; urgency=medium
 

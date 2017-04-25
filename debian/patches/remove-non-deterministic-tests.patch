@@ -1,8 +1,9 @@
 Description: Remove non-deterministic tests
 Author: Thomas Goirand <zigo@debian.org>
 Bug-Debian: https://bugs.debian.org/841516
+Bug-Debian: https://bugs.debian.org/861173
 Forwarded: no
-Last-Update: 2016-10-31
+Last-Update: 2017-04-25
 
 --- python-dogpile.cache-0.6.2.orig/tests/cache/test_memcached_backend.py
 +++ python-dogpile.cache-0.6.2/tests/cache/test_memcached_backend.py
@@ -46,3 +47,20 @@ Last-Update: 2016-10-31
 -        import gc
 -        gc.collect()
 -        eq_(MockClient.number_of_clients(), 0)
+diff --git a/tests/test_lock.py b/tests/test_lock.py
+index ff1d195..a8acf8d 100644
+--- a/tests/test_lock.py
++++ b/tests/test_lock.py
+@@ -54,12 +54,6 @@ class ConcurrencyTest(TestCase):
+             cache_expire_time='safe'
+         )
+ 
+-    def test_get_value_plus_created_registry_safe_cache_slow(self):
+-        self._test_multi(
+-            10, 5, 2, 50, .1, .1,
+-            cache_expire_time='safe'
+-        )
+-
+     def _assert_synchronized(self):
+         acq = self._assertion_lock.acquire(False)
+         assert acq, "Could not acquire"
